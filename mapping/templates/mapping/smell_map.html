@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>においマップ</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #map-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 80vh;
+        }
+        #map {
+            width: 600px;
+            height: 600px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>においマップ</h1>
+    {% include 'mapping/smell_form.html' %}
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map', {
+            center: [35.681236, 139.767125],
+            zoom: 13,
+            zoomControl: true,
+            scrollWheelZoom: true,
+            dragging: true,
+        });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        var smellData = JSON.parse('{{ smell_data|escapejs }}');
+        smellData.forEach(function(smell) {
+            var marker = L.circleMarker([smell.lat, smell.lng], {
+                radius: smell.intensity * 2,
+                color: 'red',
+                fillOpacity: 0.5
+            }).addTo(map);
+            marker.bindPopup('<b>' + smell.name + '</b><br>' + smell.description + '<br>強度: ' + smell.intensity);
+        });
+    </script>
+</body>
+</html>
